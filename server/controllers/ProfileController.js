@@ -1,4 +1,4 @@
-const User = require('../models/AuthSchema');
+const User = require('../models/UserSchema');
 const bcrypt = require('bcrypt');
 
 const multer = require("multer");

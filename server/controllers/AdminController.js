@@ -1,4 +1,4 @@
-const User = require('../models/AuthSchema');;
+const User = require('../models/UserSchema');
 
 class AdminController {
     static getAllUsers = async (req, res, next) => {
