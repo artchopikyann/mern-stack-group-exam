@@ -1,8 +1,10 @@
 const User = require('../models/UserSchema');
+const Admin = require('../models/AdminSchema');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 
 const { JWT_SECRET_KEY_USER } = process.env;
+const { JWT_SECRET_KEY_ADMIN } = process.env;
 
 class AuthControllers {
     static register = async (req, res, next) => {
@@ -32,14 +34,26 @@ class AuthControllers {
     }
 
     static login = async (req, res, next) => {
-        const { email, password } = req.body;
+        const { email, password, role } = req.body;
+        console.log('Received body:', req.body);
+        console.log('Role:', role);
 
-        if(!email.trim() || !password.trim()){
-            res.status(400).json({message: 'please fill in all fields'})
+
+        if (!email.trim() || !password.trim()) {
+            return res.status(400).json({ message: 'please fill in all fields' });
         }
 
         try {
-            const user = await User.findOne({ email });
+            let user;
+
+            if (role === 'admin') {
+                user = await Admin.findOne({ email });
+            } else if (role === 'user') {
+                user = await User.findOne({ email });
+            } else {
+                return res.status(400).json({ message: 'Invalid role' });
+            }
+
             if (!user) {
                 return res.status(400).json({ message: 'incorrect email and password' });
             }
@@ -51,8 +65,8 @@ class AuthControllers {
 
             const token = jwt.sign(
                 { userId: user._id, role: user.role },
-                JWT_SECRET_KEY_USER,
-                { expiresIn: "24h" }
+                role === 'admin' ? JWT_SECRET_KEY_ADMIN : JWT_SECRET_KEY_USER,
+                { expiresIn: "24h"}
             );
 
             res.status(200).json({

@@ -397,6 +397,39 @@ button:nth-child(3):hover {
   background-color: var(--button-secondary-hover);
 }
 
+.role-container {
+  display: flex;
+  gap: 20px;
+}
+.role-option {
+  position: relative;
+}
+.role-option input[type="radio"] {
+  display: none;
+}
+.role-label {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 140px;
+  height: 40px;
+  border: 2px solid #999;
+  border-radius: 8px;
+  background-color: white;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  font-weight: bold;
+}
+.role-option input[type="radio"]:checked + .role-label {
+  background-color: var(--input-focus);
+  color: white;
+  border-color: #4CAF50;
+}
+.role-label:hover {
+  background-color: #E0E0E0;
+}
+
+
 .login-container,
 .register-container {
   display: flex;
@@ -1576,3 +1609,8 @@ input[type="file"] {
     font-size: 13px;
   }
 }
+
+
+
+
+

@@ -8,28 +8,30 @@ const Login = () => {
 
   const handleSubmit = async (ev) => {
     ev.preventDefault();
-    const { email, password } = loginData;
+    const { email, password, role } = loginData;
 
-    if (!email.trim() || !password.trim()) {
+    if (!email.trim() || !password.trim() || !role) {
       alert('Լրացնել բոլոր դաշտերը!');
       return;
     }
 
+    const url = role === 'admin' ? 'http://localhost:5000/api/login/admin' : 'http://localhost:5000/api/login/user';
+
     try {
-      const response = await fetch('http://localhost:5000/api/login', {
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(loginData),
+        body: JSON.stringify({ email, password, role }),  // Այստեղ role-ը պետք է ուղարկվի
       });
 
       const data = await response.json();
 
       if (data.token && data.user.role) {
-        localStorage.setItem('token', data.token); 
-        localStorage.setItem('role', data.user.role); 
-        navigate('/todo'); 
+        localStorage.setItem('token', data.token);
+        localStorage.setItem('role', data.user.role);
+        navigate('/todo');
       } else {
         setErrorMessage(data.message || 'Մուտքը չհաջողվեց');
       }
@@ -55,6 +57,17 @@ const Login = () => {
 
           <label htmlFor="password" className="input-text">Password:</label>
           <input type="password" name="password" id="password" placeholder="Password..." onChange={handleChange} />
+
+          <div className="role-container">
+            <div className="role-option">
+              <input type="radio" name="role" id="admin" value="admin" onChange={handleChange} />
+              <label className="role-label" htmlFor="admin">Admin</label>
+            </div>
+            <div className="role-option">
+              <input type="radio" name="role" id="user" value="user" onChange={handleChange} />
+              <label className="role-label" htmlFor="user">User</label>
+            </div>
+          </div>
 
           <button type="submit" className="login-btn"><span></span>Login</button>
         </form>
