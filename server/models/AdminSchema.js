@@ -26,6 +26,11 @@ const AdminSchema = new mongoose.Schema({
         type: String,
         default: ""
     },
+    phoneNumber: {
+        type: Number,
+        required: true,
+        unique: true
+    },
     role: {
         type: String,
         enum: ["admin"],

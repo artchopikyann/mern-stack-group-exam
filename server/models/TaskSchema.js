@@ -6,7 +6,6 @@ const taskSchema = new mongoose.Schema({
         required: true,
     },
     description: String,
-    category: String,
     status: {
         type: String,
         enum: ["pending", "in progress", "completed"],
@@ -23,8 +22,6 @@ const taskSchema = new mongoose.Schema({
         ref: "Admin",
         required: true,
     },
-    responseText: String,
-    responseFile: String,
     createdAt: {
         type: Date,
         default: Date.now,

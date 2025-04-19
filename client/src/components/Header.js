@@ -6,6 +6,8 @@ const Header = ({ user }) => {
     const [userInfo, setUserInfo] = useState([]);
     const [image, setImage] = useState('./images/default.png');
 
+    // console.log(userInfo);
+
     const logout = () => {
         localStorage.removeItem('token');
         window.location.href = '/login';
@@ -53,9 +55,12 @@ const Header = ({ user }) => {
                 <li className={active === '/todo' ? 'active' : ''}>
                     <Link className="nav-link" to="/todo" onClick={() => setActive('/todo')}>Task Management</Link>
                 </li>
-                <li className={active === '/admin' ? 'active' : ''}>
-                    <Link className="nav-link" to="/admin" onClick={() => setActive('/admin')}>Admin Dashboard</Link>
-                </li>
+
+                {userInfo.role !== 'user' ? (
+                    <li className={active === '/admin' ? 'active' : ''}>
+                        <Link className="nav-link" to="/admin" onClick={() => setActive('/admin')}>Admin Dashboard</Link>
+                    </li>
+                ): null}
                 <li className={active === '/profile' ? 'active' : ''}>
                     <Link className="nav-link" to="/profile" onClick={() => setActive('/profile')}>Profile Settings</Link>
                 </li>

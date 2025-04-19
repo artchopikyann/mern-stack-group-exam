@@ -8,10 +8,19 @@ const authMiddleware = (req, res, next) => {
     }
 
     try {
-        const decoded = jwt.verify(token, process.env.JWT_SECRET_KEY_USER);
-        req.userId = decoded.userId; 
-        console.log('Decoded UserId:', req.userId);  
-        next();  
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET_KEY_USER);
+        } catch (userError) {
+            decoded = jwt.verify(token, process.env.JWT_SECRET_KEY_ADMIN);
+        }
+
+        req.userId = decoded.userId;
+        req.userRole = decoded.role;
+
+        // console.log(decoded);
+
+        next();
     } catch (err) {
         return res.status(400).json({ message: "Invalid token" });
     }
