@@ -8,25 +8,71 @@ const { JWT_SECRET_KEY_ADMIN } = process.env;
 
 class AuthControllers {
     static register = async (req, res, next) => {
-        const { username, surname, email, phoneNumber, password, repeatPassword } = req.body;
-
-        if (password !== repeatPassword) {
-            return res.status(400).json({ message: "Passwords do not match" });
-        }
+        const { username, surname, email, phoneNumber, password, repeatPassword, role } = req.body;
 
         try {
+
+            if (!(username.trim(), surname.trim(), email.trim(), phoneNumber.trim(), password.trim(), repeatPassword.trim(), role)) {
+                res.status(400).json({ message: 'please fill in all fields' })
+            }
+
+            if (password !== repeatPassword) {
+                return res.status(400).json({ message: "Passwords do not match" });
+            }
+
+            if (role === 'admin') {
+                const adminCount = await Admin.countDocuments();
+
+                if (adminCount > 0) {
+                    return res.status(403).json({ message: "Admin account already exists. Only one admin allowed." });
+                }
+            }
+
+            const usernameExists = await Admin.findOne({ username }) || await User.findOne({ username });
+
+            if (usernameExists) {
+                return res.status(400).json({ message: "Username already exists" });
+            }
+
+            const emailExists = await Admin.findOne({ email }) || await User.findOne({ email });
+
+            if (emailExists) {
+                return res.status(400).json({ message: "Email already exists" });
+            }
+
+            let savedAccount;
+
             const hashedPassword = await bcrypt.hash(password, 12);
-            const newUser = new User({
-                username,
-                surname,
-                email,
-                phoneNumber,
-                password: hashedPassword,
-            });
 
-            const savedUser = await newUser.save();
+            if (role === 'admin') {
 
-            res.status(201).json({ message: "User registered successfully", user: savedUser });
+                const newAdmin = new Admin({
+                    username,
+                    surname,
+                    email,
+                    phoneNumber,
+                    role,
+                    password: hashedPassword,
+                })
+                savedAccount = await newAdmin.save();
+
+            } else if (role === 'user') {
+
+                const newUser = new User({
+                    username,
+                    surname,
+                    email,
+                    phoneNumber,
+                    role,
+                    password: hashedPassword,
+                });
+
+                savedAccount = await newUser.save();
+            } else {
+                return res.status(400).json({ message: 'Invalid role' });
+            }
+
+            res.status(201).json({ message: "User registered successfully", user: savedAccount });
 
         } catch (err) {
             res.json({ message: err.message });
@@ -66,7 +112,7 @@ class AuthControllers {
             const token = jwt.sign(
                 { userId: user._id, role: user.role },
                 role === 'admin' ? JWT_SECRET_KEY_ADMIN : JWT_SECRET_KEY_USER,
-                { expiresIn: "24h"}
+                { expiresIn: "24h" }
             );
 
             res.status(200).json({

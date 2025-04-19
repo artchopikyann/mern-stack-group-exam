@@ -9,12 +9,16 @@ const Register = () => {
         email: '',
         phoneNumber: '',
         password: '',
-        repeatPassword: ''
+        repeatPassword: '',
+        role: 'user'
     });
+
+    const [errorMessage, setErrorMessage] = useState('');
 
     const navigate = useNavigate();
 
     const handleChange = (ev) => {
+        console.log(registerData);
         setRegisterData((prevState) => ({
             ...prevState,
             [ev.target.name]: ev.target.value
@@ -24,20 +28,17 @@ const Register = () => {
     const handleSubmit = async (ev) => {
         ev.preventDefault();
 
-        const { username, surname, email, phoneNumber, password, repeatPassword } = registerData;
+        const { username, surname, email, phoneNumber, password, repeatPassword, role } = registerData;
 
-        if (!username.trim() || !surname.trim() || !email.trim() || !phoneNumber.trim() || !password.trim() || !repeatPassword.trim()) {
-            alert('խնդրում ենք լրացնել բոլոր դաշտերը');
+        if(!(username.trim(), surname.trim(), email.trim(), phoneNumber.trim(), password.trim(), repeatPassword.trim(), role)){
+            setErrorMessage('please fill in all fields');
             return;
         }
 
-        if (password !== repeatPassword) {
-            alert('Գաղտնաբառերը չեն համընկնում');
-            return;
-        }
+        const url = role === 'admin' ? "http://localhost:5000/api/register/admin" : "http://localhost:5000/api/register/user"
 
         try {
-            const response = await fetch("http://localhost:5000/api/register", {
+            const response = await fetch(url, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json",
@@ -46,7 +47,11 @@ const Register = () => {
             });
 
             const data = await response.json();
-            alert(data.message);
+
+            if(data.error){
+                setErrorMessage(data.error);
+                return;
+            }
 
             navigate('/login');
 
@@ -120,6 +125,17 @@ const Register = () => {
                         onChange={handleChange}
                     />
 
+                    <div className="role-container">
+                        <div className="role-option">
+                            <input type="radio" name="role" id="admin" value="admin" checked={registerData.role === "admin"} onChange={handleChange} />
+                            <label className="role-label" htmlFor="admin">Admin</label>
+                        </div>
+                        <div className="role-option">
+                            <input type="radio" name="role" id="user" value="user" checked={registerData.role === "user"} onChange={handleChange} />
+                            <label className="role-label" htmlFor="user">User</label>
+                        </div>
+                    </div>
+                    <h4 style={{ color: 'red', textAlign: 'center' , margin: '15px 0'}}>{errorMessage}</h4>
                     <button type='submit' className='register-btn'><span></span>Register</button>
                 </form>
                 <p>Are you already registered? <Link to={'/login'} className='link'>Login</Link></p>

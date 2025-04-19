@@ -11,7 +11,7 @@ const Login = () => {
     const { email, password, role } = loginData;
 
     if (!email.trim() || !password.trim() || !role) {
-      alert('Լրացնել բոլոր դաշտերը!');
+      setErrorMessage('Fill in all fields!');
       return;
     }
 
@@ -23,7 +23,7 @@ const Login = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, role }),  // Այստեղ role-ը պետք է ուղարկվի
+        body: JSON.stringify({ email, password, role }),  
       });
 
       const data = await response.json();
@@ -33,11 +33,11 @@ const Login = () => {
         localStorage.setItem('role', data.user.role);
         navigate('/todo');
       } else {
-        setErrorMessage(data.message || 'Մուտքը չհաջողվեց');
+        setErrorMessage(data.message || 'Login failed.');
       }
     } catch (err) {
       console.log(err.message);
-      setErrorMessage('Սերվերի սխալ');
+      setErrorMessage('Server error');
     }
   };
 
@@ -69,7 +69,7 @@ const Login = () => {
             </div>
           </div>
 
-          <button type="submit" className="login-btn"><span></span>Login</button>
+          <button type="submit" className="login-btn" style={{marginTop: '25px'}}><span></span>Login</button>
         </form>
         <h4 className="loginError">{errorMessage}</h4>
         <p>Don't have an account? <Link to="/register" className="link">Register</Link></p>
