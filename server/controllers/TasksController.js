@@ -1,4 +1,5 @@
 const User = require("../models/UserSchema");
+const Task = require('../models/TaskSchema');
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
@@ -19,7 +20,7 @@ const storage = multer.diskStorage({
 const upload = multer({ storage });
 
 class TaskController {
-    static getTasks = async (req, res) => {
+    static getTasksFromUser = async (req, res) => {
         console.log('userId:', req.userId);
         const userId = req.userId;
         const { category } = req.params;
@@ -48,24 +49,49 @@ class TaskController {
 
     static addTask = async (req, res) => {
         try {
-            const userId = req.userId;
-            const file = req.file ? `/uploads/${req.file.filename}` : null;
+            const { title, description, creationDay, deadline, userId } = req.body;
+            const file = req.file ? req.file.filename : null;
 
+            // Ստուգում ենք օգտատիրոջ գոյությունը
             const user = await User.findById(userId);
+            if (!user) return res.status(404).json({ message: "User not found" });
 
-            const newTask = {
-                title: req.body.title,
+            // Ստանում ենք ադմինի ID-ն JWT-ից
+            const adminId = req.userId;
+
+            // Ստեղծում ենք նոր task ըստ Task schema-ի
+            const newTask = await Task.create({
+                title,
+                description,
+                creationDay,
+                deadline,
                 file,
-                status: "pending",
-                user: userId
-            };
+                assignedTo: userId,
+                createdBy: adminId,
+            });
 
-            user.tasks.push(newTask);
+            user.tasks.push({
+                title: newTask.title,
+                description: newTask.description,
+                file: newTask.file,
+                status: newTask.status,
+                notifications: true,
+                creationDay: newTask.creationDay,
+                deadline: newTask.deadline,
+            });
+
             await user.save();
 
-            res.json(newTask);
+            // Ընտրովի՝ ադմինի assignedTasks-ում պահել task-ի հղումը
+            // await Admin.findByIdAndUpdate(adminId, {
+            //     $push: { assignedTasks: newTask._id }
+            // });
+
+            res.status(201).json({ message: "Task created successfully", task: newTask });
+
         } catch (err) {
-            res.status(500).json({ message: err.message });
+            console.error("Error creating task:", err.message);
+            res.status(500).json({ message: "Internal server error" });
         }
     };
 
@@ -107,7 +133,7 @@ class TaskController {
     static updateStatus = async (req, res) => {
         const { status } = req.body;
         const { id } = req.params;
-        const userId = req.userId;  
+        const userId = req.userId;
 
         try {
             const user = await User.findOne({ _id: userId });
@@ -126,7 +152,7 @@ class TaskController {
 
             await user.save();
 
-            res.json(task);  
+            res.json(task);
         } catch (err) {
             console.error(err.message);
             res.status(500).json({ message: "Error updating task status" });
@@ -155,8 +181,19 @@ class TaskController {
         }
     };
 
-}
+    static taskControllerFromAdmin = async (req, res) => {
+        try {
+            const user = await User.findById(req.params.userId).populate('tasks');
 
+            if (!user) return res.status(404).json({ message: "User not found" });
+
+            res.status(200).json(user.tasks);
+        } catch (err) {
+            console.error("Error fetching user tasks:", err);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    }
+}
 
 module.exports = { TaskController, upload };
 

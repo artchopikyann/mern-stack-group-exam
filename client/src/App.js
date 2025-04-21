@@ -6,12 +6,16 @@ import Login from './components/Login';
 import Register from './components/Register';
 import Layout from './components/Layout';
 
-import Todo from './pages/TodoPage';
+import TodoPageFromAdmin from './pages/TodoPageFromAdmin';
+import TodoPageFromUser from './pages/TodoPageFromUser'
 import Admin from './pages/AdminPage';
 import ProfilePage from './pages/ProfilePage';
+import UserTasksPage from './pages/UserTasksPage';
 
 function App() {
   const [user, setUser] = useState({});
+
+  const role = localStorage.getItem('role');
 
   const darkModeFunc = () => {
     const themeToggle = document.getElementById('theme-toggle');
@@ -42,9 +46,10 @@ function App() {
           <Route path="/register" element={<Register />} />
           <Route element={<Layout user={user} />}>
             <Route path="/" element={<Navigate to="/login" />} />
-            <Route path="/todo" element={<Todo />} />
+            <Route path="/todo" element={role === 'admin' ? <TodoPageFromAdmin /> : <TodoPageFromUser />} />
             <Route path="/admin" element={<Admin />} />
             <Route path="/profile" element={<ProfilePage setUser={setUser} />} />
+            <Route path="/user-tasks/:userId" element={< UserTasksPage />} />
           </Route>
         </Routes>
       </BrowserRouter>

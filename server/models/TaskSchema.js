@@ -12,6 +12,14 @@ const taskSchema = new mongoose.Schema({
         default: "pending",
     },
     file: String,
+    creationDay: {
+        type: Date,
+        required: true,
+    },
+    deadline: {
+        type: Date,
+        required: true,
+    },
     assignedTo: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
