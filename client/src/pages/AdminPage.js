@@ -11,8 +11,6 @@ const Admin = () => {
                 const response = await fetch("http://localhost:5000/api/users");
                 const data = await response.json();
                 setUsers(data);
-                console.log(response);
-
             } catch (err) {
                 console.error("Error fetching users:", err);
             }

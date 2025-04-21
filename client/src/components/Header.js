@@ -6,11 +6,12 @@ const Header = ({ user }) => {
     const [userInfo, setUserInfo] = useState([]);
     const [image, setImage] = useState('./images/default.png');
 
-    // console.log(userInfo);
 
     const logout = () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('role');
         window.location.href = '/login';
+
     };
 
     useEffect(() => {

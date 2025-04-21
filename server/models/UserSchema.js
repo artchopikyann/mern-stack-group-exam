@@ -47,6 +47,8 @@ const UserSchema = new mongoose.Schema({
         status: { type: String, enum: ["pending", "inprogress", "completed"], default: "pending" },
         description: { type: String },
         notifications: { type: Boolean, default: true },
+        creationDay: { type: Date },
+        deadline: { type: Date }
     }]
 });
 

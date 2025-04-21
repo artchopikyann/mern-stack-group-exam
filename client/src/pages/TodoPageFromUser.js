@@ -227,8 +227,6 @@ function App() {
                                 </button>
                             </div>
                         </div>
-
-
                     </li>
                 ))}
             </ul>
