@@ -62,24 +62,24 @@ function App() {
         setFile(e.target.files[0]);
     };
 
-    const updateStatus = async (taskId, newStatus) => {
-        try {
-            await axios.put(`http://localhost:5000/tasks/${taskId}`, { status: newStatus }, {
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem('token')}`,
-                },
-            });
-    
-            const updatedTasks = tasks.map((task) =>
-                task._id === taskId ? { ...task, status: newStatus } : task
-            );
-    
-            setTasks(updatedTasks);
-        } catch (error) {
-            console.error("Error updating status:", error.message);
-            alert("Error updating task status!"); 
-        }
-    };
+    // const updateStatus = async (taskId, newStatus) => {
+    //     try {
+    //         await axios.put(`http://localhost:5000/tasks/${taskId}`, { status: newStatus }, {
+    //             headers: {
+    //                 "Authorization": `Bearer ${localStorage.getItem('token')}`,
+    //             },
+    //         });
+    //
+    //         const updatedTasks = tasks.map((task) =>
+    //             task._id === taskId ? { ...task, status: newStatus } : task
+    //         );
+    //
+    //         setTasks(updatedTasks);
+    //     } catch (error) {
+    //         console.error("Error updating status:", error.message);
+    //         alert("Error updating task status!");
+    //     }
+    // };
     
 
     const updateTask = async (e) => {
@@ -144,20 +144,29 @@ function App() {
             <h1>Task Management</h1>
 
             <form onSubmit={editTaskId ? updateTask : addTask} className="form-container">
-                <input
-                    type="text"
-                    value={title}
-                    onChange={(e) => setTitle(e.target.value)}
-                    placeholder="Enter task..."
-                    required
-                    className="task-input"
-                />
-                <div className="file-uploader">
-                    <input type="file" id="fileInput" onChange={handleFileChange} />
-                    <label htmlFor="fileInput" className="file-button">
-                        <img src="/images/file.png" alt={"File"} style={{ width: "35px" }} />
-                    </label>
+                <div
+                    onDrop={(e) => {
+                        e.preventDefault();
+                        setFile(e.dataTransfer.files[0]);
+                    }}
+                    onDragOver={(e) => e.preventDefault()}
+                    onClick={() => document.getElementById("hiddenFileInput").click()}
+                    className="file-input"
+                >
+                    {file ? (
+                        <p style={{alignItems: "center"}} className="fileinput-text"><img src='/images/file.png' alt='file' style={{width: "25px"}}/>{file.name}</p>
+                    ) : (
+                        <p className="fileinput-text">Drop a file or click to select one</p>
+                    )}
+                    <input
+                        type="file"
+                        id="hiddenFileInput"
+                        className="file-input"
+                        style={{ display: "none" }}
+                        onChange={handleFileChange}
+                    />
                 </div>
+
                 <div id="fileName" className="file-name"></div>
                 <button type="submit" className="submit-btn">
                     {editTaskId ? "Update" : "Submit"}
@@ -170,7 +179,6 @@ function App() {
 
                 <div className="categorybtn">
                     <button onClick={() => setCategory('all')}>All</button>
-                    <button onClick={() => setCategory('pending')}>Pending</button>
                     <button onClick={() => setCategory('inprogress')}>In Progress</button>
                     <button onClick={() => setCategory('completed')}>Completed</button>
                 </div>
@@ -180,7 +188,7 @@ function App() {
             <div className="search-container">
                 <input
                     type="text"
-                    placeholder="Search task..."
+                    placeholder="Search my tasks..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     className="search-input"
@@ -203,25 +211,6 @@ function App() {
                                             : "Completed"}
                                 </p>
 
-                            </div>
-
-
-                            <div className="task-buttons">
-                                <button
-                                    className="pending-btn"
-                                    onClick={() => updateStatus(task._id, "pending")}>
-                                    Pending
-                                </button>
-                                <button
-                                    className="progress-btn"
-                                    onClick={() => updateStatus(task._id, "inprogress")}>
-                                    In Progress
-                                </button>
-                                <button
-                                    className="completed-btn"
-                                    onClick={() => updateStatus(task._id, "completed")}>
-                                    Completed
-                                </button>
                             </div>
                             <div className="task-buttons">
                                 <button

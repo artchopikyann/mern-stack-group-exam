@@ -1,4 +1,4 @@
-const User = require("../models/UserSchema");
+const Task = require("../models/TaskSchema");
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
@@ -20,25 +20,15 @@ const upload = multer({ storage });
 
 class TaskController {
     static getTasks = async (req, res) => {
-        console.log('userId:', req.userId);
+        // console.log('userId:', req.userId);
         const userId = req.userId;
         const { category } = req.params;
 
         try {
-            const user = await User.findOne({ _id: userId }).select('tasks');
-            console.log("Fetched user:", user);
+            const query = {assignedTo: userId};
+            if (category !== all) query.category = category;
 
-            if (!user) {
-                return res.status(404).json({ message: "User not found" });
-            }
-
-            let tasks;
-            if (category === 'all') {
-                tasks = user.tasks;
-            } else {
-                tasks = user.tasks.filter(task => task.status === category);
-            }
-
+            const tasks = await Task.find({ query }).select('tasks');
             res.json(tasks);
         } catch (err) {
             console.log(err.message);
@@ -48,21 +38,18 @@ class TaskController {
 
     static addTask = async (req, res) => {
         try {
-            const userId = req.userId;
             const file = req.file ? `/uploads/${req.file.filename}` : null;
 
-            const user = await User.findById(userId);
-
-            const newTask = {
+            const newTask = new Task({
                 title: req.body.title,
-                file,
+                description: req.body.description,
+                file: file,
                 status: "pending",
-                user: userId
-            };
+                assignedTo: req.userId,
+                createdBy: req.adminId || req.userId
+            });
 
-            user.tasks.push(newTask);
-            await user.save();
-
+            await newTask.save();
             res.json(newTask);
         } catch (err) {
             res.status(500).json({ message: err.message });
@@ -72,30 +59,25 @@ class TaskController {
     static updateTask = async (req, res) => {
         const { title, status } = req.body;
         const { id } = req.params;
-        const userId = req.userId;
 
         try {
-            const user = await User.findOne({ _id: userId });
-
-            if (!user) return res.status(404).json({ message: "User not found" });
-
-            const task = user.tasks.id(id);
-
+            const task = await Task.findById(id);
             if (!task) return res.status(404).json({ message: "Task not found" });
 
-            console.log('Before Update:', task);
+            // console.log('Before Update:', task);
 
             task.title = title || task.title;
             task.status = status || task.status;
+            task.description = description || task.description;
 
             if (req.file) {
-                console.log('Updating file:', req.file.filename);
+                // console.log('Updating file:', req.file.filename);
                 task.file = `/uploads/${req.file.filename}`;
             }
 
-            await user.save();
+            await task.save();
 
-            console.log('After Update:', task);
+            // console.log('After Update:', task);
 
             res.json(task);
         } catch (err) {
@@ -107,25 +89,17 @@ class TaskController {
     static updateStatus = async (req, res) => {
         const { status } = req.body;
         const { id } = req.params;
-        const userId = req.userId;  
 
         try {
-            const user = await User.findOne({ _id: userId });
-
-            if (!user) {
-                return res.status(404).json({ message: "User not found" });
-            }
-
-            const task = user.tasks.id(id);
+            const task = await Task.findById(id);
 
             if (!task) {
                 return res.status(404).json({ message: "Task not found" });
             }
 
-            task.status = status || task.status;
+            task.status = status;
 
-            await user.save();
-
+            await task.save();
             res.json(task);  
         } catch (err) {
             console.error(err.message);
@@ -134,23 +108,15 @@ class TaskController {
     };
 
     static deleteTask = async (req, res) => {
+        const { id } = req.params;
+
         try {
-            const userId = req.userId;
-            const { id } = req.params;
-
-            const user = await User.findOne({ _id: userId });
-
-            if (!user) {
-                return res.status(404).json({ message: "User not found" });
-            }
-
-            user.tasks = user.tasks.filter((task) => task._id.toString() !== id);
-
-            await user.save();
+            const deleted = await Task.findByIdAndDelete(id);
+            if (!deleted) return res.status(404).json({ message: "Task not found" });
 
             res.json({ message: "Task deleted successfully" });
         } catch (err) {
-            console.error(err.message);
+            console.error(err);
             res.status(500).json({ message: "Error deleting task" });
         }
     };

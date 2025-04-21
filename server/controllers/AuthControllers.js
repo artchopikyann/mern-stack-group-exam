@@ -81,8 +81,8 @@ class AuthControllers {
 
     static login = async (req, res, next) => {
         const { email, password, role } = req.body;
-        console.log('Received body:', req.body);
-        console.log('Role:', role);
+        // console.log('Received body:', req.body);
+        // console.log('Role:', role);
 
 
         if (!email.trim() || !password.trim()) {
@@ -110,7 +110,7 @@ class AuthControllers {
             }
 
             const token = jwt.sign(
-                { userId: user._id, role: user.role },
+                { userId: user._id, adminId: user._id, role: user.role },
                 role === 'admin' ? JWT_SECRET_KEY_ADMIN : JWT_SECRET_KEY_USER,
                 { expiresIn: "24h" }
             );
