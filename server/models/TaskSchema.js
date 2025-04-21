@@ -6,13 +6,20 @@ const taskSchema = new mongoose.Schema({
         required: true,
     },
     description: String,
-    category: String,
     status: {
         type: String,
         enum: ["pending", "in progress", "completed"],
         default: "pending",
     },
     file: String,
+    creationDay: {
+        type: Date,
+        required: true,
+    },
+    deadline: {
+        type: Date,
+        required: true,
+    },
     assignedTo: {
         type: mongoose.Schema.Types.ObjectId,
         ref: "User",
@@ -23,8 +30,6 @@ const taskSchema = new mongoose.Schema({
         ref: "Admin",
         required: true,
     },
-    responseText: String,
-    responseFile: String,
     createdAt: {
         type: Date,
         default: Date.now,
