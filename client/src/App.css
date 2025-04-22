@@ -241,7 +241,7 @@ li:hover .nav-link {
   position: relative;
 }
 
- h1 {
+.admin h1 {
   text-align: center;
   color: var(--bg-color-hover);
   margin-bottom: 2rem;
@@ -585,6 +585,7 @@ button:nth-child(3):hover {
   padding: 12px 16px;
   border: 2px solid #3A7CD5;
   border-radius: 12px;
+  margin-top: 20px;
   font-size: 16px;
   background-color: var(--bg-color);
   transition: all 0.3s ease;
@@ -634,13 +635,13 @@ button:nth-child(3):hover {
 }
 
 
+
 .general .file-input {
-  width: 83%;
+  width: 99%;
   border: 2px dashed #3A7CD5;
   border-radius: 10px;
   padding: 20px;
   text-align: center;
-  margin-bottom: 20px;
   cursor: pointer;
   background-color: var(--bg-color);
   transition: all 0.3s ease;
@@ -1620,9 +1621,6 @@ button:nth-child(3):hover {
 }
 
 
-
-
-
 /* TaskModal */
 .modal-overlay {
   position: fixed;
@@ -1651,9 +1649,9 @@ button:nth-child(3):hover {
   cursor: pointer;
 }
 
-input[type="text"],
-input[type="file"],
-input[type="date"],
+.input-txt,
+.input-fl,
+.input-date,
 textarea {
   width: 100%;
   padding: 8px;
@@ -1667,11 +1665,12 @@ textarea {
   min-height: 60px;
 }
 
+
 button[type="submit"] {
   margin-top: 15px;
   padding: 10px;
   width: 100%;
-  background-color: #28a745;
+  background-color: #007bff;
   color: white;
   border: none;
   border-radius: 6px;
@@ -1679,7 +1678,7 @@ button[type="submit"] {
 }
 
 button[type="submit"]:hover {
-  background-color: #218838;
+  background-color: #0c4270;
 }
 
 button.open-modal-btn {
@@ -1690,3 +1689,7 @@ button.open-modal-btn {
   border-radius: 6px;
   cursor: pointer;
 }
+
+
+
+

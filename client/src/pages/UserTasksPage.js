@@ -4,12 +4,9 @@ import { useParams } from "react-router-dom";
 
 function UserTasksPage() {
     const { userId } = useParams();
-
+    const [category, setCategory] = useState('all');
     const [tasks, setTasks] = useState([]);
     const [error, setError] = useState(null);
-    console.log(tasks)
-
-    console.log(tasks)
 
 
     useEffect(() => {
@@ -29,6 +26,9 @@ function UserTasksPage() {
         };
         fetchUserTasks();
     }, [userId]);
+
+
+
 
     return (
         <div className="general">
@@ -64,12 +64,21 @@ function UserTasksPage() {
                             <button className="delete-btn" onClick={() => { }}>
                                 <img src="/images/delete.png" alt={"Delete"} style={{ width: "30px" }} />
                             </button>
+                            {task.status === 'inprogress' && (
+                                <button>
+                                    <a href={`http://localhost:5000/uploads/${task.file}`}
+                                        download={task.file}
+                                    >
+                                        <img src="/images/file.png" alt={"File"} style={{width: "30px"}}/>
+                                    </a>
+                                </button>
+                            )}
                         </div>
                     </li>
                 ))}
             </ul>
 
-        </div >
+        </div>
     );
 }
 

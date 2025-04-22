@@ -22,6 +22,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 
 app.use("/uploads-image", express.static(path.join(__dirname, "uploads-image")));
+app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
 start().then();
 
@@ -41,5 +42,7 @@ app.use((err, req, res, next) => {
   res.status(err.status || 500);
   res.render('error');
 });
+
+
 
 module.exports = app;

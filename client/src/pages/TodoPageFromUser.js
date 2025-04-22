@@ -1,5 +1,7 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
+import { Link } from "react-router-dom";
+import UserTaskModal from "../components/UserTaskModal";
 
 
 function App() {
@@ -10,6 +12,7 @@ function App() {
     const [editTaskId, setEditTaskId] = useState(null);
     const [category, setCategory] = useState('all');
     const [searchTerm, setSearchTerm] = useState("");
+    const [modalOpen, setmodalOpen] = useState(false);
 
     useEffect(() => {
         const fetchTasks = async () => {
@@ -39,6 +42,7 @@ function App() {
 
         const formData = new FormData();
         formData.append("title", title);
+        formData.append("status", "pending");
         if (file) formData.append("file", file);
 
         try {
@@ -60,38 +64,42 @@ function App() {
 
     const handleFileChange = (e) => {
         setFile(e.target.files[0]);
+        if (e.target.files[0]) {
+            setStatus("completed");
+        } else {
+            setStatus("pending");
+        }
+    };
+    const updateStatus = async (taskId, newStatus) => {
+        try {
+            await axios.put(`http://localhost:5000/tasks/${taskId}`, { status: newStatus }, {
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+
+            const updatedTasks = tasks.map((task) =>
+                task._id === taskId ? { ...task, status: newStatus } : task
+            );
+
+            setTasks(updatedTasks);
+        } catch (error) {
+            console.error("Error updating status:", error.message);
+            alert("Error updating task status!");
+        }
     };
 
-    // const updateStatus = async (taskId, newStatus) => {
-    //     try {
-    //         await axios.put(`http://localhost:5000/tasks/${taskId}`, { status: newStatus }, {
-    //             headers: {
-    //                 "Authorization": `Bearer ${localStorage.getItem('token')}`,
-    //             },
-    //         });
-    //
-    //         const updatedTasks = tasks.map((task) =>
-    //             task._id === taskId ? { ...task, status: newStatus } : task
-    //         );
-    //
-    //         setTasks(updatedTasks);
-    //     } catch (error) {
-    //         console.error("Error updating status:", error.message);
-    //         alert("Error updating task status!");
-    //     }
-    // };
-    
 
     const updateTask = async (e) => {
         e.preventDefault();
         const formData = new FormData();
         formData.append("title", title);
         formData.append("status", status);
-    
+
         if (file) {
             formData.append("file", file);
         }
-    
+
         try {
             const res = await axios.put(`http://localhost:5000/tasks/${editTaskId}`, formData, {
                 headers: {
@@ -99,19 +107,19 @@ function App() {
                     "Authorization": `Bearer ${localStorage.getItem('token')}`,
                 },
             });
-    
+
             const updatedTasks = tasks.map((task) =>
                 task._id === editTaskId
                     ? { ...task, title: title || task.title, status: status || task.status, file: res.data.file || task.file }
                     : task
             );
-    
+
             setTasks(updatedTasks);
             setEditTaskId(null);
             setTitle("");
             setStatus("pending");
             setFile(null);
-    
+
         } catch (error) {
             console.error("Error updating task:", error.message);
         }
@@ -143,42 +151,12 @@ function App() {
         <div className="general">
             <h1>Task Management</h1>
 
-            <form onSubmit={editTaskId ? updateTask : addTask} className="form-container">
-                <div
-                    onDrop={(e) => {
-                        e.preventDefault();
-                        setFile(e.dataTransfer.files[0]);
-                    }}
-                    onDragOver={(e) => e.preventDefault()}
-                    onClick={() => document.getElementById("hiddenFileInput").click()}
-                    className="file-input"
-                >
-                    {file ? (
-                        <p style={{alignItems: "center"}} className="fileinput-text"><img src='/images/file.png' alt='file' style={{width: "25px"}}/>{file.name}</p>
-                    ) : (
-                        <p className="fileinput-text">Drop a file or click to select one</p>
-                    )}
-                    <input
-                        type="file"
-                        id="hiddenFileInput"
-                        className="file-input"
-                        style={{ display: "none" }}
-                        onChange={handleFileChange}
-                    />
-                </div>
-
-                <div id="fileName" className="file-name"></div>
-                <button type="submit" className="submit-btn">
-                    {editTaskId ? "Update" : "Submit"}
-                </button>
-            </form>
-            <br />
-
             <div className="category">
                 <div className="categoryname">Categories</div>
 
                 <div className="categorybtn">
                     <button onClick={() => setCategory('all')}>All</button>
+                    <button onClick={() => setCategory('pending')}>Pending</button>
                     <button onClick={() => setCategory('inprogress')}>In Progress</button>
                     <button onClick={() => setCategory('completed')}>Completed</button>
                 </div>
@@ -198,7 +176,10 @@ function App() {
 
             <ul className="task-list">
                 {filteredTasks.map((task) => (
-                    <li key={task._id} className="task-list-item">
+                    <li key={task._id} className="task-list-item" onClick={() =>{
+                        updateStatus(task._id, 'inprogress');
+                        setmodalOpen(true);
+                    }}>
 
                         <div className="task-list-title">{task.title}</div>
                         <div className="row-todo">
@@ -212,25 +193,49 @@ function App() {
                                 </p>
 
                             </div>
-                            <div className="task-buttons">
-                                <button
-                                    className="edit-button"
-                                    onClick={() => {
-                                        setEditTaskId(task._id);
-                                        setTitle(task.title);
-                                        setStatus(task.status);
-                                    }}>
-                                    <img src="/images/edit.png" alt={"Edit"} style={{ width: "30px" }} />
-                                </button>
-                                <button className="delete-btn" onClick={() => deleteTask(task._id)}>
-                                    <img src="/images/delete.png" alt={"Delete"} style={{ width: "30px" }} />
-                                </button>
-                            </div>
+                            <div className="task-descr">{task.description}</div>
+                            <div className="task-date">{task.creationDay.slice(0,10)} / {task.deadline.slice(0,10)}</div>
+
+
+
+                            {/*<div className="task-buttons">*/}
+                            {/*    <button*/}
+                            {/*        className="edit-button"*/}
+                            {/*        onClick={() => {*/}
+                            {/*            setEditTaskId(task._id);*/}
+                            {/*            setTitle(task.title);*/}
+                            {/*            setStatus(task.status);*/}
+                            {/*        }}>*/}
+                            {/*        <img src="/images/edit.png" alt={"Edit"} style={{ width: "30px" }} />*/}
+                            {/*    </button>*/}
+                            {/*    <button className="delete-btn" onClick={() => deleteTask(task._id)}>*/}
+                            {/*        <img src="/images/delete.png" alt={"Delete"} style={{ width: "30px" }} />*/}
+                            {/*    </button>*/}
+                            {/*</div>*/}
                         </div>
                     </li>
                 ))}
             </ul>
+
+            {modalOpen && (
+                <UserTaskModal
+                    isOpen={modalOpen}
+                    onClose={() => setmodalOpen(false)}
+                    editTaskId={editTaskId}
+                    updateTask={updateTask}
+                    addTask={addTask}
+                    file={file}
+                    setFile={setFile}
+                    handleFileChange={handleFileChange}
+                    task={tasks}
+                    setStatus={setStatus}
+                />
+            )}
+
+
         </div>
+
+
     );
 }
 

@@ -66,6 +66,7 @@ function TaskModal({ isOpen, onClose, userId }) {
                     <label>Title:</label>
                     <input
                         type="text"
+                        className="input-txt"
                         name="title"
                         value={formData.title}
                         onChange={handleChange}
@@ -85,6 +86,7 @@ function TaskModal({ isOpen, onClose, userId }) {
                     <label>Creation Day:</label>
                     <input
                         type="date"
+                        className="input-date"
                         name="creationDay"
                         value={formData.creationDay}
                         onChange={handleChange}
@@ -93,6 +95,7 @@ function TaskModal({ isOpen, onClose, userId }) {
                     <label>Deadline:</label>
                     <input
                         type="date"
+                        className="input-date"
                         name="deadline"
                         value={formData.deadline}
                         onChange={handleChange}
@@ -101,6 +104,7 @@ function TaskModal({ isOpen, onClose, userId }) {
                     <label>File:</label>
                     <input
                         style={{ display: 'block' }}
+                        className="input-fl"
                         type="file"
                         name="file"
                         onChange={handleChange}

@@ -49,7 +49,7 @@ const Header = ({ user }) => {
 
             <div className='logo'>
                 <Link to={'/todo'}>
-                    <img src={'./images/logotext.png'} style={{ width: "200px" }} alt={"logo"} />
+                    <img src={'images/logotext.png'} style={{ width: "200px" }} alt={"logo"} />
                 </Link>
             </div>
             <ul>

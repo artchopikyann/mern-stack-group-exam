@@ -6,7 +6,7 @@ const fs = require("fs");
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadPath = path.join(__dirname, "../uploads");
+        const uploadPath = path.join(__dirname, "uploads");
         if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath, { recursive: true });
         }
@@ -52,14 +52,13 @@ class TaskController {
             const { title, description, creationDay, deadline, userId } = req.body;
             const file = req.file ? req.file.filename : null;
 
-            // Ստուգում ենք օգտատիրոջ գոյությունը
             const user = await User.findById(userId);
             if (!user) return res.status(404).json({ message: "User not found" });
 
-            // Ստանում ենք ադմինի ID-ն JWT-ից
             const adminId = req.userId;
 
-            // Ստեղծում ենք նոր task ըստ Task schema-ի
+
+
             const newTask = await Task.create({
                 title,
                 description,
@@ -81,11 +80,6 @@ class TaskController {
             });
 
             await user.save();
-
-            // Ընտրովի՝ ադմինի assignedTasks-ում պահել task-ի հղումը
-            // await Admin.findByIdAndUpdate(adminId, {
-            //     $push: { assignedTasks: newTask._id }
-            // });
 
             res.status(201).json({ message: "Task created successfully", task: newTask });
 

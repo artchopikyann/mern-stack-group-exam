@@ -11,6 +11,7 @@ import TodoPageFromUser from './pages/TodoPageFromUser'
 import Admin from './pages/AdminPage';
 import ProfilePage from './pages/ProfilePage';
 import UserTasksPage from './pages/UserTasksPage';
+import TasksForAdmin from "./pages/TasksForAdmin";
 
 function App() {
   const [user, setUser] = useState({});
