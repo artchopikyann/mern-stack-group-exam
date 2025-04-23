@@ -23,17 +23,22 @@ const Login = () => {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ email, password, role }),  
+        body: JSON.stringify({ email, password, role }),
       });
 
       const data = await response.json();
 
-      if (data.token && data.user.role) {
+      if (data.token && data.user.role && data.user.status) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('role', data.user.role);
+        localStorage.setItem('status', data.user.status);
         navigate('/todo');
       } else {
         setErrorMessage(data.message || 'Login failed.');
+      }
+
+      if(localStorage.getItem('status') === 'Blocked'){
+        navigate('/blocked-user');
       }
     } catch (err) {
       console.log(err.message);
@@ -69,7 +74,7 @@ const Login = () => {
             </div>
           </div>
 
-          <button type="submit" className="login-btn" style={{marginTop: '25px'}}><span></span>Login</button>
+          <button type="submit" className="login-btn" style={{ marginTop: '25px' }}><span></span>Login</button>
         </form>
         <h4 className="loginError">{errorMessage}</h4>
         <p>Don't have an account? <Link to="/register" className="link">Register</Link></p>

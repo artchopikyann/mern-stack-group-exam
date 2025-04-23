@@ -6,10 +6,25 @@ class AdminController {
         res.json(user);
     }
 
+    static deleteUser = async (req, res, next) => {
+        const { id } = req.params;
+    
+        try {
+            const user = await User.findByIdAndDelete(id);
+            if (!user) {
+                return res.status(404).json({ message: "User not found" });
+            }
+    
+            res.json({ message: "User successfully deleted", user });
+        } catch (error) {
+            res.status(500).json({ message: "Server error" });
+        }
+    };
+    
+
     static updateUserStatus = async (req, res, next) => {
         const { id } = req.params;
         let { status } = req.body;
-
 
         const validStatu = ["Active", "Blocked", "Deleted"];
         if (!validStatu.includes(status)) {

@@ -11,7 +11,7 @@ import TodoPageFromUser from './pages/TodoPageFromUser'
 import Admin from './pages/AdminPage';
 import ProfilePage from './pages/ProfilePage';
 import UserTasksPage from './pages/UserTasksPage';
-import TasksForAdmin from "./pages/TasksForAdmin";
+import BlockedUserPage from './pages/BlockedUserPage';
 
 function App() {
   const [user, setUser] = useState({});
@@ -45,6 +45,7 @@ function App() {
         <Routes>
           <Route path="/login" element={<Login />} />
           <Route path="/register" element={<Register />} />
+          <Route path="/blocked-user" element={< BlockedUserPage />} />
           <Route element={<Layout user={user} />}>
             <Route path="/" element={<Navigate to="/login" />} />
             <Route path="/todo" element={role === 'admin' ? <TodoPageFromAdmin /> : <TodoPageFromUser />} />

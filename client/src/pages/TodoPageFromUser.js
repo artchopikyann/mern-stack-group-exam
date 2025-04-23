@@ -3,16 +3,16 @@ import axios from "axios";
 import { Link } from "react-router-dom";
 import UserTaskModal from "../components/UserTaskModal";
 
-
 function App() {
     const [tasks, setTasks] = useState([]);
     const [title, setTitle] = useState("");
+    const [description, setDescription] = useState("");
     const [file, setFile] = useState(null);
     const [status, setStatus] = useState("pending");
     const [editTaskId, setEditTaskId] = useState(null);
     const [category, setCategory] = useState('all');
     const [searchTerm, setSearchTerm] = useState("");
-    const [modalOpen, setmodalOpen] = useState(false);
+    const [modalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
         const fetchTasks = async () => {
@@ -23,12 +23,12 @@ function App() {
                         "Authorization": `Bearer ${token}`
                     }
                 });
-                setTasks(res.data); 
+                setTasks(res.data);
             } catch (err) {
                 console.error("Error fetching tasks:", err.message);
             }
         };
-    
+
         fetchTasks();
     }, [category]);
 
@@ -36,12 +36,11 @@ function App() {
         e.preventDefault();
 
         const token = localStorage.getItem("token");
-        if (!token) {
-            return console.error("No token found. Please log in.");
-        }
+        if (!token) return console.error("No token found. Please log in.");
 
         const formData = new FormData();
         formData.append("title", title);
+        formData.append("description", description);
         formData.append("status", "pending");
         if (file) formData.append("file", file);
 
@@ -54,6 +53,7 @@ function App() {
             });
             setTasks([...tasks, res.data]);
             setTitle("");
+            setDescription("");
             setFile(null);
             setStatus("pending");
             setEditTaskId(null);
@@ -62,14 +62,43 @@ function App() {
         }
     };
 
-    const handleFileChange = (e) => {
-        setFile(e.target.files[0]);
-        if (e.target.files[0]) {
-            setStatus("completed");
-        } else {
+    const updateTask = async (e) => {
+        e.preventDefault();
+
+        const formData = new FormData();
+        formData.append("title", title);
+        formData.append("description", description);
+        formData.append("status", status);
+        if (file) formData.append("file", file);
+
+     
+        try {
+            const res = await axios.put(`http://localhost:5000/tasks/update-user/${editTaskId}`, formData, {
+                headers: {
+                    "Content-Type": "multipart/form-data",
+                    "Authorization": `Bearer ${localStorage.getItem('token')}`,
+                },
+            });
+
+
+            const updatedTasks = tasks.map((task) =>
+                task._id === editTaskId
+                    ? { ...task, title: title || task.title, description: description || task.description, status: status || task.status, file: res.data.task.file || task.file }
+                    : task
+            );
+
+            setTasks(updatedTasks);
+            setEditTaskId(null);
+            setTitle("");
+            setDescription("");
             setStatus("pending");
+            setFile(null);
+            setModalOpen(false);
+        } catch (error) {
+            console.error("Error updating task:", error.message);
         }
     };
+
     const updateStatus = async (taskId, newStatus) => {
         try {
             await axios.put(`http://localhost:5000/tasks/${taskId}`, { status: newStatus }, {
@@ -89,63 +118,18 @@ function App() {
         }
     };
 
-
-    const updateTask = async (e) => {
-        e.preventDefault();
-        const formData = new FormData();
-        formData.append("title", title);
-        formData.append("status", status);
-
-        if (file) {
-            formData.append("file", file);
-        }
-
-        try {
-            const res = await axios.put(`http://localhost:5000/tasks/${editTaskId}`, formData, {
-                headers: {
-                    "Content-Type": "multipart/form-data",
-                    "Authorization": `Bearer ${localStorage.getItem('token')}`,
-                },
-            });
-
-            const updatedTasks = tasks.map((task) =>
-                task._id === editTaskId
-                    ? { ...task, title: title || task.title, status: status || task.status, file: res.data.file || task.file }
-                    : task
-            );
-
-            setTasks(updatedTasks);
-            setEditTaskId(null);
-            setTitle("");
+    const handleFileChange = (e) => {
+        setFile(e.target.files[0]);
+        if (e.target.files[0]) {
+            setStatus("completed");
+        } else {
             setStatus("pending");
-            setFile(null);
-
-        } catch (error) {
-            console.error("Error updating task:", error.message);
-        }
-    };
-    
-
-    const deleteTask = async (id) => {
-        try {
-            await axios.delete(`http://localhost:5000/tasks/${id}`, {
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem('token')}`,
-                },
-            });
-    
-            const updatedTasks = tasks.filter((task) => task._id !== id);
-            setTasks(updatedTasks);
-        } catch (err) {
-            console.error("Error deleting task:", err.message);
-            alert("Error deleting task!");
         }
     };
 
     const filteredTasks = tasks.filter((task) =>
         task.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    
 
     return (
         <div className="general">
@@ -153,14 +137,12 @@ function App() {
 
             <div className="category">
                 <div className="categoryname">Categories</div>
-
                 <div className="categorybtn">
                     <button onClick={() => setCategory('all')}>All</button>
                     <button onClick={() => setCategory('pending')}>Pending</button>
                     <button onClick={() => setCategory('inprogress')}>In Progress</button>
                     <button onClick={() => setCategory('completed')}>Completed</button>
                 </div>
-
             </div>
 
             <div className="search-container">
@@ -173,14 +155,17 @@ function App() {
                 />
             </div>
 
-
             <ul className="task-list">
                 {filteredTasks.map((task) => (
-                    <li key={task._id} className="task-list-item" onClick={() =>{
+                    <li key={task._id} className="task-list-item" onClick={() => {
                         updateStatus(task._id, 'inprogress');
-                        setmodalOpen(true);
+                        setTitle(task.title);
+                        setDescription(task.description || "");
+                        setStatus(task.status);
+                        setFile(null);
+                        setEditTaskId(task._id);
+                        setModalOpen(true);
                     }}>
-
                         <div className="task-list-title">{task.title}</div>
                         <div className="row-todo">
                             <div className={task.status} id="status">
@@ -191,27 +176,11 @@ function App() {
                                             ? "Pending"
                                             : "Completed"}
                                 </p>
-
                             </div>
                             <div className="task-descr">{task.description}</div>
-                            <div className="task-date">{task.creationDay.slice(0,10)} / {task.deadline.slice(0,10)}</div>
-
-
-
-                            {/*<div className="task-buttons">*/}
-                            {/*    <button*/}
-                            {/*        className="edit-button"*/}
-                            {/*        onClick={() => {*/}
-                            {/*            setEditTaskId(task._id);*/}
-                            {/*            setTitle(task.title);*/}
-                            {/*            setStatus(task.status);*/}
-                            {/*        }}>*/}
-                            {/*        <img src="/images/edit.png" alt={"Edit"} style={{ width: "30px" }} />*/}
-                            {/*    </button>*/}
-                            {/*    <button className="delete-btn" onClick={() => deleteTask(task._id)}>*/}
-                            {/*        <img src="/images/delete.png" alt={"Delete"} style={{ width: "30px" }} />*/}
-                            {/*    </button>*/}
-                            {/*</div>*/}
+                            <div className="task-date">
+                                {task.creationDay?.slice(0, 10)} / {task.deadline?.slice(0, 10)}
+                            </div>
                         </div>
                     </li>
                 ))}
@@ -220,22 +189,23 @@ function App() {
             {modalOpen && (
                 <UserTaskModal
                     isOpen={modalOpen}
-                    onClose={() => setmodalOpen(false)}
+                    onClose={() => setModalOpen(false)}
                     editTaskId={editTaskId}
                     updateTask={updateTask}
                     addTask={addTask}
                     file={file}
                     setFile={setFile}
-                    handleFileChange={handleFileChange}
+                    onChange={handleFileChange}
                     task={tasks}
+                    title={title}
+                    setTitle={setTitle}
+                    description={description}
+                    setDescription={setDescription}
+                    status={status}
                     setStatus={setStatus}
                 />
             )}
-
-
         </div>
-
-
     );
 }
 
