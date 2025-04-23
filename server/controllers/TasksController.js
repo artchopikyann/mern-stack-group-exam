@@ -1,5 +1,6 @@
 const User = require("../models/UserSchema");
 const Task = require('../models/TaskSchema');
+const Admin = require('../models/AdminSchema');
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
@@ -48,9 +49,12 @@ class TaskController {
     };
 
     static addTask = async (req, res) => {
+        console.log('add task', req.file)
         try {
             const { title, description, creationDay, deadline, userId } = req.body;
             const file = req.file ? req.file.filename : null;
+
+            console.log(1111, req.file)
 
             const user = await User.findById(userId);
             if (!user) return res.status(404).json({ message: "User not found" });
@@ -70,6 +74,7 @@ class TaskController {
             });
 
             user.tasks.push({
+                _id: newTask._id,
                 title: newTask.title,
                 description: newTask.description,
                 file: newTask.file,
@@ -89,14 +94,73 @@ class TaskController {
         }
     };
 
+    static updateTaskAdmin = async (req, res) => {
+        const { title, description, deadline } = req.body
+        try {
+
+            const admin = await Admin.findById(req.userId);
+            if (!admin) {
+                return res.status(403).json({ message: "Admin access denied" });
+            }
+
+            const task = await Task.findById(req.params.id);
+            if (!task) {
+                return res.status(404).json({ message: "Task not found" });
+            }
+
+            task.title = title || task.title
+            task.deadline = deadline || task.deadline;
+            task.description = description || task.description;
+
+            if (req.file) {
+                if (task.file) {
+                    const oldPath = path.join(__dirname, '../uploads', task.file);
+                    if (fs.existsSync(oldPath)) {
+                        fs.unlinkSync(oldPath);
+                    }
+                }
+                task.file = req.file.filename;
+            }
+
+            await task.save();
+
+            const user = await User.findById(task.assignedTo);
+            if (user) {
+                const userTask = user.tasks.id(task._id);
+                if (userTask) {
+                    userTask.title = task.title;
+                    userTask.description = task.description;
+                    userTask.deadline = task.deadline;
+                    userTask.file = task.file;
+                    await user.save();
+                }
+            }
+
+            return res.status(200).json({
+                message: "Task updated successfully",
+                task: {
+                    _id: task._id,
+                    title: task.title,
+                    status: task.status,
+                    deadline: task.deadline,
+                    file: task.file
+                }
+            });
+
+        } catch (error) {
+            console.error("Error:", err.message);
+            res.status(500).json({ message: "Error updating task status" });
+        }
+    }
+
     static updateTask = async (req, res) => {
-        const { title, status } = req.body;
+        const { title, status, description } = req.body;
         const { id } = req.params;
         const userId = req.userId;
 
         try {
             const user = await User.findOne({ _id: userId });
-
+            
             if (!user) return res.status(404).json({ message: "User not found" });
 
             const task = user.tasks.id(id);
@@ -105,13 +169,17 @@ class TaskController {
 
             console.log('Before Update:', task);
 
+            console.log(11111111111)
             task.title = title || task.title;
+            task.description = description || task.description;
             task.status = status || task.status;
 
+            console.log(22222222222222)
             if (req.file) {
                 console.log('Updating file:', req.file.filename);
                 task.file = `/uploads/${req.file.filename}`;
             }
+            console.log(333333333333333)
 
             await user.save();
 
@@ -155,16 +223,26 @@ class TaskController {
 
     static deleteTask = async (req, res) => {
         try {
-            const userId = req.userId;
+            const adminId = req.userId;
             const { id } = req.params;
 
-            const user = await User.findOne({ _id: userId });
+            const task = await Task.findById(id);
+
+            if (!task) {
+                return res.status(404).json({ message: "Task not found" });
+            }
+
+            if (task.createdBy != adminId) {
+                return res.status(403).json({ message: "You are not authorized to delete this task" });
+            }
+
+            const user = await User.findById(task.assignedTo);
 
             if (!user) {
                 return res.status(404).json({ message: "User not found" });
             }
 
-            user.tasks = user.tasks.filter((task) => task._id.toString() !== id);
+            user.tasks = user.tasks.filter((userTask) => userTask._id != id);
 
             await user.save();
 
@@ -174,6 +252,7 @@ class TaskController {
             res.status(500).json({ message: "Error deleting task" });
         }
     };
+
 
     static taskControllerFromAdmin = async (req, res) => {
         try {
@@ -186,7 +265,34 @@ class TaskController {
             console.error("Error fetching user tasks:", err);
             res.status(500).json({ message: "Internal server error" });
         }
+
     }
+
+    static submitTaskFile = async (req, res) => {
+        try {
+            const { id } = req.params;
+            const userId = req.userId;
+
+            const user = await User.findById(userId);
+            if (!user) return res.status(404).json({ message: "User not found" });
+
+            const task = user.tasks.id(id);
+            if (!task) return res.status(404).json({ message: "Task not found" });
+
+            if (req.file) {
+                task.file = `/uploads/${req.file.filename}`;
+            }
+
+            task.status = "completed";
+            await user.save();
+
+            res.json({ message: "File submitted successfully", task });
+        } catch (err) {
+            console.error("Error submitting task file:", err.message);
+            res.status(500).json({ message: "Internal server error" });
+        }
+    };
+
 }
 
 module.exports = { TaskController, upload };

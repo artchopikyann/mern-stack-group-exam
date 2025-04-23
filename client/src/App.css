@@ -1021,6 +1021,15 @@ button:nth-child(3):hover {
 }
 
 
+.deleted-user{
+  height: 100vh;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  /* justify-content: center; */
+  /* margin-top: 200px; */
+}
+
 
 /* ====================== Enhanced Responsive Media Queries ====================== */
 

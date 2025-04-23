@@ -20,16 +20,15 @@ const Admin = () => {
 
 
     useEffect(() => {
-         fetch("http://localhost:5000/api/stats")
+        fetch("http://localhost:5000/api/stats")
             .then((res) => res.json())
             .then((data) => setTotal(data))
             .catch((err) => console.error("Error fetching total:", err));
     }, []);
 
     const updateUserStatus = async (id, status) => {
-
         const checkRole = localStorage.getItem('role');
-        if(checkRole === 'user'){
+        if (checkRole === 'user') {
             alert('փոփոխություն կարող է անել միայն ադմինը');
             return;
         }
@@ -40,9 +39,13 @@ const Admin = () => {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ status }),
             });
-    
+
             const updatedUser = await response.json();
-    
+
+            if(updatedUser.status === 'Blocked'){
+
+            }
+
             if (updatedUser.message) {
                 console.error(updatedUser.message);
                 alert(updatedUser.message);
@@ -56,11 +59,39 @@ const Admin = () => {
         }
     };
 
+    const deleteUser = async (id) => {
+        const checkRole = localStorage.getItem('role');
+        if (checkRole === 'user') {
+            alert('Օգտվողը կարող է ջնջել միայն ադմինը');
+            return;
+        }
+
+        if (!window.confirm("Are you sure you want to delete this user?")) return;
+
+        try {
+            const response = await fetch(`http://localhost:5000/api/users/${id}`, {
+                method: "DELETE",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("token")}`
+                },
+            });
+
+            const data = await response.json();
+
+            if (data.message === "User successfully deleted") {
+                setUsers(prevUsers => prevUsers.filter(user => user._id !== id));
+            } else {
+                alert(data.message);
+            }
+        } catch (err) {
+            console.error("Error deleting user:", err);
+        }
+    };
+
+
     const filteredUsers = users.filter((user) =>
         user.username.toLowerCase().includes(searchTerm.toLowerCase())
     );
-    
-
 
     return (
         <div className="admin">
@@ -118,7 +149,7 @@ const Admin = () => {
                                                 <td className='admin-btn'>
                                                     <button onClick={() => updateUserStatus(user._id, "Active")}>Active</button>
                                                     <button onClick={() => updateUserStatus(user._id, "Blocked")}>Blocked</button>
-                                                    <button onClick={() => updateUserStatus(user._id, "Deleted")}>Deleted</button>
+                                                    <button onClick={() => deleteUser(user._id)}>Delete</button>
                                                 </td>
                                             </tr>
                                         );
@@ -129,7 +160,7 @@ const Admin = () => {
                     </div>
                 </div>
             </div>
-            
+
         </div>
     )
 }
