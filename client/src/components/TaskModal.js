@@ -25,7 +25,7 @@ function TaskModal({ isOpen, onClose, userId }) {
         form.append("description", formData.description);
         form.append("creationDay", formData.creationDay);
         form.append("deadline", formData.deadline);
-        form.append("userId", userId); 
+        form.append("userId", userId);
         if (formData.file) {
             form.append("file", formData.file);
         }
@@ -40,11 +40,10 @@ function TaskModal({ isOpen, onClose, userId }) {
             });
 
             const result = await response.json();
-            console.log(result);
 
             if (response.ok) {
                 alert("Task created successfully");
-                onClose(); 
+                onClose();
             } else {
                 alert(result.message || "Failed to create task");
             }

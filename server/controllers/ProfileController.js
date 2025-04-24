@@ -29,8 +29,6 @@ class ProfileController {
                 avatar: user.avatar,
                 role: req.userRole,
             };
-            // console.log(user.phoneNumber)
-
 
             res.json(responseUser);
         } catch (err) {
@@ -42,8 +40,6 @@ class ProfileController {
         const {firstName, lastName, email, phone} = req.body;
         const profileImage = req.file ? req.file.filename : null;
         const userId = req.userId;
-
-        // console.log("Uploaded file:", req.file);
 
         try {
             const user = await User.findById(req.userId) || await Admin.findById(req.userId)

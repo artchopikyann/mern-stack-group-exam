@@ -17,7 +17,8 @@ function UserTaskModal({
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
-        console.log(selectedFile);
+        console.log(111, selectedFile);
+        
         if (!selectedFile) return;
 
         if (!validFileTypes.includes(selectedFile.type)) {

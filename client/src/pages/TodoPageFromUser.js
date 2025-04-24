@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios";
-import { Link } from "react-router-dom";
 import UserTaskModal from "../components/UserTaskModal";
 
 function App() {
@@ -15,6 +14,7 @@ function App() {
     const [modalOpen, setModalOpen] = useState(false);
 
     useEffect(() => {
+        console.log(tasks);
         const fetchTasks = async () => {
             const token = localStorage.getItem('token');
             try {
@@ -71,7 +71,7 @@ function App() {
         formData.append("status", status);
         if (file) formData.append("file", file);
 
-     
+     console.log(editTaskId)
         try {
             const res = await axios.put(`http://localhost:5000/tasks/update-user/${editTaskId}`, formData, {
                 headers: {

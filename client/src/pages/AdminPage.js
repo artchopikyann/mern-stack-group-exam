@@ -18,7 +18,6 @@ const Admin = () => {
         getUsers();
     }, []);
 
-
     useEffect(() => {
         fetch("http://localhost:5000/api/stats")
             .then((res) => res.json())
@@ -87,7 +86,6 @@ const Admin = () => {
             console.error("Error deleting user:", err);
         }
     };
-
 
     const filteredUsers = users.filter((user) =>
         user.username.toLowerCase().includes(searchTerm.toLowerCase())

@@ -65,6 +65,10 @@ const Header = ({ user }) => {
                 <li className={active === '/profile' ? 'active' : ''}>
                     <Link className="nav-link" to="/profile" onClick={() => setActive('/profile')}>Profile Settings</Link>
                 </li>
+                <li className={`notif ${active === '/notifications' ? 'active' : ''}`}>
+                    <Link className="nav-link" to="/notifications" onClick={() => setActive('/notifications')}>Notifications</Link>
+                    <span className='notification-icon'></span>
+                </li>
                 <li className={active === '/logout' ? 'active' : ''}>
                     <Link className="nav-link" to="#" onClick={logout}>Logout</Link>
                 </li>
