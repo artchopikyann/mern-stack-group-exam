@@ -75,7 +75,10 @@ function App() {
                                                     }}>
                                                     Add Task
                                                 </button>
-                                                <Link to={`/user-tasks/${user._id}`}>View Tasks</Link>
+                                                <button>
+                                                    <Link to={`/user-tasks/${user._id}`} className="link-todo">View Tasks</Link>
+                                                </button>
+
                                             </td>
 
                                         </tr>

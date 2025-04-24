@@ -49,7 +49,14 @@ const UserSchema = new mongoose.Schema({
         notifications: { type: Boolean, default: true },
         creationDay: { type: Date },
         deadline: { type: Date }
+    }],
+    notifications: [{
+        message: { type: String, required: true },
+        date: { type: Date, default: Date.now },
+        read: { type: Boolean, default: false }
     }]
 });
 
 module.exports = mongoose.model("User", UserSchema);
+
+

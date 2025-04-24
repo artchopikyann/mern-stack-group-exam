@@ -12,11 +12,11 @@ function UserTasksPage() {
     const [editStatus, setEditStatus] = useState("pending");
     const [editDeadline, setEditDeadline] = useState("");
     const [editFile, setEditFile] = useState(null);
-
-    console.log(tasks)
+    const [loading, setLoading] = useState(false); 
 
     useEffect(() => {
         const fetchUserTasks = async () => {
+            setLoading(true);
             try {
                 const token = localStorage.getItem("token");
                 const response = await axios.get(`http://localhost:5000/tasks/user/${userId}`, {
@@ -28,6 +28,8 @@ function UserTasksPage() {
             } catch (err) {
                 console.error("Error fetching tasks:", err);
                 setError("Failed to fetch tasks. Please try again later.");
+            } finally {
+                setLoading(false);
             }
         };
         fetchUserTasks();
@@ -59,33 +61,37 @@ function UserTasksPage() {
     };
 
     const handleUpdate = async () => {
+        if (!editTitle || !editDescription || !editDeadline) {
+            alert("Please fill in all fields before updating.");
+            return;
+        }
+
         const formData = new FormData();
         formData.append("title", editTitle);
         formData.append("description", editDescription);
         formData.append("deadline", editDeadline);
+        formData.append("status", editStatus);
 
         if (editFile) {
             formData.append("file", editFile);
         }
 
+        setLoading(true);
         try {
-            const response = await axios.put(`http://localhost:5000/tasks/update-admin/${editTaskId}`, formData,
-                {
-                    headers: {
-                        Authorization: `Bearer ${localStorage.getItem("token")}`,
-                        "Content-Type": "multipart/form-data",
-                    }
-                }
-            );
+            const response = await axios.put(`http://localhost:5000/tasks/update-admin/${editTaskId}`, formData, {
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                    "Content-Type": "multipart/form-data",
+                },
+            });
 
             setTasks(prevTasks =>
                 prevTasks.map(task =>
                     task._id === editTaskId
-                        ? { ...task, ...response.data } // merge instead of replace
+                        ? { ...task, ...response.data } 
                         : task
                 )
             );
-
 
             setEditTaskId(null);
             setEditTitle("");
@@ -93,30 +99,21 @@ function UserTasksPage() {
             setEditStatus("pending");
             setEditDeadline("");
             setEditFile(null);
-
         } catch (err) {
-            console.error("Թարմացման սխալ:", {
-                error: err,
-                response: err.response?.data,
-                status: err.response?.status
-            });
-
-            let errorMessage = "Թասկը թարմացնելիս սխալ տեղի ունեցավ";
-            if (err.response?.data?.message) {
-                errorMessage += `: ${err.response.data.message}`;
-            } else if (err.message) {
-                errorMessage += `: ${err.message}`;
-            }
-
-            alert(errorMessage);
+            console.error("Error updating task:", err);
+        } finally {
+            setLoading(false);
         }
     };
+
     return (
         <div className="general">
             <h1>User's Tasks</h1>
-            <ul className="task-list">
 
-                {tasks && tasks.length > 0 ? (
+            {error && <p>{error}</p>}
+
+            <ul className="task-list">
+                {tasks.length > 0 ? (
                     tasks.map((task) => (
                         <li key={task._id} className="task-list-item" style={{ display: 'flex', alignItems: 'center' }}>
                             {editTaskId === task._id ? (
@@ -147,7 +144,6 @@ function UserTasksPage() {
                             ) : (
                                 <>
                                     <div className="task-list">
-
                                         <div className="row-todo">
                                             <div className={task.status} id="status">
                                                 <p className="status-text">
@@ -159,8 +155,8 @@ function UserTasksPage() {
                                                 </p>
                                             </div>
                                             <div className="task-list-title">{task.title}</div>
-                                        <div className="task-descr">{task.description}</div>
-                                        <div className="task-dater">{task.creationDay.slice(0, 10)} / {task.deadline.slice(0, 10)}</div>
+                                            <div className="task-descr">{task.description}</div>
+                                            <div className="task-dater">{task.creationDay.slice(0, 10)} / {task.deadline.slice(0, 10)}</div>
                                         </div>
                                         <div className="task-buttons">
                                             <button className="edit-button" onClick={() => handleEdit(task)}>
@@ -169,7 +165,7 @@ function UserTasksPage() {
                                             <button className="delete-btn" onClick={() => handleDelete(task._id)}>
                                                 <img src="/images/delete.png" alt={"Delete"} style={{ width: "30px" }} />
                                             </button>
-                                            {task.status === 'inprogress' && task.file && (
+                                            {task.status === 'completed' && task.file && (
                                                 <button>
                                                     <a href={`http://localhost:5000/uploads/${task.file}`} download={task.file}>
                                                         <img src="/images/file.png" alt={"File"} style={{ width: "30px" }} />
@@ -178,7 +174,6 @@ function UserTasksPage() {
                                             )}
                                         </div>
                                     </div>
-
                                 </>
                             )}
                         </li>

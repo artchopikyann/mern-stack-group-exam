@@ -81,9 +81,6 @@ class AuthControllers {
 
     static login = async (req, res, next) => {
         const { email, password, role } = req.body;
-        // console.log('Received body:', req.body);
-        // console.log('Role:', role);
-
 
         if (!email.trim() || !password.trim()) {
             return res.status(400).json({ message: 'please fill in all fields' });
@@ -91,6 +88,7 @@ class AuthControllers {
 
         try {
             let user;
+            
 
             if (role === 'admin') {
                 user = await Admin.findOne({ email });

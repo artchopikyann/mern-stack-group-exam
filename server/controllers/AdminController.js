@@ -21,7 +21,6 @@ class AdminController {
         }
     };
     
-
     static updateUserStatus = async (req, res, next) => {
         const { id } = req.params;
         let { status } = req.body;

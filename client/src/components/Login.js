@@ -28,10 +28,12 @@ const Login = () => {
 
       const data = await response.json();
 
-      if (data.token && data.user.role && data.user.status) {
+      if (data.token && data.user.role) {
         localStorage.setItem('token', data.token);
         localStorage.setItem('role', data.user.role);
-        localStorage.setItem('status', data.user.status);
+        if(data.user.role === 'user'){
+          localStorage.setItem('status', data.user.status);
+        }
         navigate('/todo');
       } else {
         setErrorMessage(data.message || 'Login failed.');

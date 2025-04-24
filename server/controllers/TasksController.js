@@ -4,17 +4,21 @@ const Admin = require('../models/AdminSchema');
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
+const { notification } = require("./NotificationController");
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
-        const uploadPath = path.join(__dirname, "uploads");
+        const uploadPath = path.join(__dirname, 'uploads');
+
         if (!fs.existsSync(uploadPath)) {
             fs.mkdirSync(uploadPath, { recursive: true });
         }
+
         cb(null, uploadPath);
     },
     filename: (req, file, cb) => {
-        cb(null, Date.now() + path.extname(file.originalname));
+        const uniqueSuffix = Date.now() + path.extname(file.originalname);
+        cb(null, uniqueSuffix);
     }
 });
 
@@ -84,6 +88,10 @@ class TaskController {
                 deadline: newTask.deadline,
             });
 
+            user.notifications.push({
+                message: 'The admin has assigned a new task:'
+            })
+
             await user.save();
 
             res.status(201).json({ message: "Task created successfully", task: newTask });
@@ -95,7 +103,7 @@ class TaskController {
     };
 
     static updateTaskAdmin = async (req, res) => {
-        const { title, description, deadline } = req.body
+        const { title, description, deadline, status } = req.body
         try {
 
             const admin = await Admin.findById(req.userId);
@@ -111,6 +119,7 @@ class TaskController {
             task.title = title || task.title
             task.deadline = deadline || task.deadline;
             task.description = description || task.description;
+            task.status = status === 'pending' ? status : 'pending'
 
             if (req.file) {
                 if (task.file) {
@@ -132,6 +141,7 @@ class TaskController {
                     userTask.description = task.description;
                     userTask.deadline = task.deadline;
                     userTask.file = task.file;
+                    userTask.status = 'pending';
                     await user.save();
                 }
             }
@@ -143,7 +153,7 @@ class TaskController {
                     title: task.title,
                     status: task.status,
                     deadline: task.deadline,
-                    file: task.file
+                    file: task.file,
                 }
             });
 
@@ -160,37 +170,29 @@ class TaskController {
 
         try {
             const user = await User.findOne({ _id: userId });
-            
+
             if (!user) return res.status(404).json({ message: "User not found" });
 
             const task = user.tasks.id(id);
-
             if (!task) return res.status(404).json({ message: "Task not found" });
 
-            console.log('Before Update:', task);
-
-            console.log(11111111111)
             task.title = title || task.title;
             task.description = description || task.description;
             task.status = status || task.status;
 
-            console.log(22222222222222)
             if (req.file) {
-                console.log('Updating file:', req.file.filename);
-                task.file = `/uploads/${req.file.filename}`;
+                task.file = req.file.filename || task.file;
             }
-            console.log(333333333333333)
 
             await user.save();
 
-            console.log('After Update:', task);
-
-            res.json(task);
+            res.json({ task });
         } catch (err) {
             console.error('Error:', err.message);
             res.status(500).json({ message: "Error updating task" });
         }
     };
+
 
     static updateStatus = async (req, res) => {
         const { status } = req.body;
@@ -253,7 +255,6 @@ class TaskController {
         }
     };
 
-
     static taskControllerFromAdmin = async (req, res) => {
         try {
             const user = await User.findById(req.params.userId).populate('tasks');
@@ -267,31 +268,6 @@ class TaskController {
         }
 
     }
-
-    static submitTaskFile = async (req, res) => {
-        try {
-            const { id } = req.params;
-            const userId = req.userId;
-
-            const user = await User.findById(userId);
-            if (!user) return res.status(404).json({ message: "User not found" });
-
-            const task = user.tasks.id(id);
-            if (!task) return res.status(404).json({ message: "Task not found" });
-
-            if (req.file) {
-                task.file = `/uploads/${req.file.filename}`;
-            }
-
-            task.status = "completed";
-            await user.save();
-
-            res.json({ message: "File submitted successfully", task });
-        } catch (err) {
-            console.error("Error submitting task file:", err.message);
-            res.status(500).json({ message: "Internal server error" });
-        }
-    };
 
 }
 
