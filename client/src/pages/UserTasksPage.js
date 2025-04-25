@@ -12,7 +12,7 @@ function UserTasksPage() {
     const [editStatus, setEditStatus] = useState("pending");
     const [editDeadline, setEditDeadline] = useState("");
     const [editFile, setEditFile] = useState(null);
-    const [loading, setLoading] = useState(false); 
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         const fetchUserTasks = async () => {
@@ -88,7 +88,7 @@ function UserTasksPage() {
             setTasks(prevTasks =>
                 prevTasks.map(task =>
                     task._id === editTaskId
-                        ? { ...task, ...response.data } 
+                        ? { ...task, ...response.data }
                         : task
                 )
             );
@@ -138,8 +138,11 @@ function UserTasksPage() {
                                         type="file"
                                         onChange={(e) => setEditFile(e.target.files[0])}
                                     />
-                                    <button onClick={handleUpdate}>Save</button>
-                                    <button onClick={() => setEditTaskId(null)}>Cancel</button>
+                                    <div className="edit-buttons">
+                                        <button onClick={handleUpdate} className="save-button">Save</button>
+                                        <button onClick={() => setEditTaskId(null)} className="cancel-button">Close</button>
+                                    </div>
+
                                 </>
                             ) : (
                                 <>
@@ -156,7 +159,6 @@ function UserTasksPage() {
                                             </div>
                                             <div className="task-list-title">{task.title}</div>
                                             <div className="task-descr">{task.description}</div>
-                                            <div className="task-dater">{task.creationDay.slice(0, 10)} / {task.deadline.slice(0, 10)}</div>
                                         </div>
                                         <div className="task-buttons">
                                             <button className="edit-button" onClick={() => handleEdit(task)}>
@@ -166,13 +168,15 @@ function UserTasksPage() {
                                                 <img src="/images/delete.png" alt={"Delete"} style={{ width: "30px" }} />
                                             </button>
                                             {task.status === 'completed' && task.file && (
-                                                <button>
-                                                    <a href={`http://localhost:5000/uploads/${task.file}`} download={task.file}>
+                                                <button className="download-btn">
+                                                    <a href={`http://localhost:5000/download/${task.file}`} download >
                                                         <img src="/images/file.png" alt={"File"} style={{ width: "30px" }} />
                                                     </a>
                                                 </button>
                                             )}
                                         </div>
+                                        <div className="task-dater">{task.creationDay.slice(0, 10)} / {task.deadline.slice(0, 10)}</div>
+
                                     </div>
                                 </>
                             )}

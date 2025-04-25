@@ -7,6 +7,8 @@ const cors = require('cors');
 const start = require('./config/db');
 
 const indexRouter = require('./routes/index');
+const fileRouter = require('./routes/file');
+
 
 const app = express();
 
@@ -21,9 +23,8 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(cors());
 
-app.use("/uploads-image", express.static(path.join(__dirname, "uploads-image")));
-app.use("/uploads", express.static(path.join(__dirname, "uploads")));
-
+app.use("/uploads", express.static(path.join(__dirname, "controllers", "uploads")));
+app.use('/download', fileRouter);
 start().then();
 
 app.use('/', indexRouter);

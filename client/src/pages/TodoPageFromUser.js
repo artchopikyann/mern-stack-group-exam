@@ -156,6 +156,7 @@ function App() {
             </div>
 
             <ul className="task-list">
+
                 {filteredTasks.map((task) => (
                     <li key={task._id} className="task-list-item" onClick={() => {
                         updateStatus(task._id, 'inprogress');
@@ -166,7 +167,7 @@ function App() {
                         setEditTaskId(task._id);
                         setModalOpen(true);
                     }}>
-                        <div className="task-list-title">{task.title}</div>
+
                         <div className="row-todo">
                             <div className={task.status} id="status">
                                 <p className="status-text">
@@ -177,14 +178,30 @@ function App() {
                                             : "Completed"}
                                 </p>
                             </div>
+                            <div className="task-list-title">{task.title}</div>
                             <div className="task-descr">{task.description}</div>
-                            <div className="task-date">
+
+                            {task.file && (
+                                <a
+                                    href={`http://localhost:5000/download/${task.file}`}
+                                    download
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    className="download-btn"
+                                    onClick={(e) => e.stopPropagation()}
+                                >
+                                    <img src="/images/file.png" alt="file" style={{ width: "30px"}} />
+                                </a>
+                            )}
+                            <div className="task-dater">
                                 {task.creationDay?.slice(0, 10)} / {task.deadline?.slice(0, 10)}
                             </div>
+
                         </div>
                     </li>
                 ))}
             </ul>
+
 
             {modalOpen && (
                 <UserTaskModal

@@ -13,7 +13,13 @@ function UserTaskModal({
     const [fileError, setFileError] = useState(false);
     const [dragOver, setDragOver] = useState(false);
 
-    const validFileTypes = ['application/pdf', 'image/png'];
+    const validFileTypes = [
+        'application/pdf',
+        'image/png',
+        'image/jpeg',
+        'image/jpg',
+        'application/vnd.openxmlformats-officedocument.wordprocessingml.document'
+    ];
 
     const handleFileChange = (e) => {
         const selectedFile = e.target.files[0];
@@ -98,6 +104,7 @@ function UserTaskModal({
                             className="file-input"
                             style={{ display: "none" }}
                             onChange={handleFileChange}
+                            accept=".pdf,.png,.jpg,.jpeg,.docx"
                         />
                     </div>
 

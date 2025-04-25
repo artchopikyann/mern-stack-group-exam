@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import TaskModal from '../components/TaskModal';
-import { Link } from 'react-router-dom'
+import {Link} from 'react-router-dom'
 
 function App() {
     const [users, setUsers] = useState([]);
@@ -47,44 +47,45 @@ function App() {
                     </div>
                     <table>
                         <thead>
-                            <tr>
-                                <th>Id</th>
-                                <th>Name</th>
-                                <th>Email</th>
-                                <th>Role</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
+                        <tr>
+                            <th>Id</th>
+                            <th>Name</th>
+                            <th>Email</th>
+                            <th>Role</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
                         </thead>
                         <tbody>
-                            {
-                                filteredusers.map((user, index) => {
-                                    return (
-                                        <tr key={user._id}>
-                                            <td>{index + 1}</td>
-                                            <td className='td-name'>{user.username}</td>
-                                            <td>{user.email}</td>
-                                            <td>{user.role}</td>
-                                            <td>{user.status}</td>
-                                            <td className='admin-btn'>
-                                                <button
-                                                    className="open-modal-btn"
-                                                    onClick={() => {
-                                                        setSelectedUser(user);
-                                                        setShowModal(true);
-                                                    }}>
-                                                    Add Task
-                                                </button>
-                                                <button>
-                                                    <Link to={`/user-tasks/${user._id}`} className="link-todo">View Tasks</Link>
-                                                </button>
+                        {
+                            filteredusers.map((user, index) => {
+                                return (
+                                    <tr key={user._id}>
+                                        <td>{index + 1}</td>
+                                        <td className='td-name'>{user.username}</td>
+                                        <td>{user.email}</td>
+                                        <td>{user.role}</td>
+                                        <td>{user.status}</td>
+                                        <td className='admin-btn'>
+                                            <button
+                                                className="open-modal-btn"
+                                                onClick={() => {
+                                                    setSelectedUser(user);
+                                                    setShowModal(true);
+                                                }}>
+                                                Add Task
+                                            </button>
+                                            <button>
+                                                <Link to={`/user-tasks/${user._id}`} className="link-todo">View
+                                                    Tasks</Link>
+                                            </button>
 
-                                            </td>
+                                        </td>
 
-                                        </tr>
-                                    );
-                                })
-                            }
+                                    </tr>
+                                );
+                            })
+                        }
                         </tbody>
                     </table>
                 </div>
