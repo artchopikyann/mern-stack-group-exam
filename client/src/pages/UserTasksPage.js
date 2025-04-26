@@ -12,11 +12,10 @@ function UserTasksPage() {
     const [editStatus, setEditStatus] = useState("pending");
     const [editDeadline, setEditDeadline] = useState("");
     const [editFile, setEditFile] = useState(null);
-    const [loading, setLoading] = useState(false);
+
 
     useEffect(() => {
         const fetchUserTasks = async () => {
-            setLoading(true);
             try {
                 const token = localStorage.getItem("token");
                 const response = await axios.get(`http://localhost:5000/tasks/user/${userId}`, {
@@ -28,8 +27,6 @@ function UserTasksPage() {
             } catch (err) {
                 console.error("Error fetching tasks:", err);
                 setError("Failed to fetch tasks. Please try again later.");
-            } finally {
-                setLoading(false);
             }
         };
         fetchUserTasks();
@@ -71,12 +68,13 @@ function UserTasksPage() {
         formData.append("description", editDescription);
         formData.append("deadline", editDeadline);
         formData.append("status", editStatus);
+        formData.append('notification', '');
 
         if (editFile) {
             formData.append("file", editFile);
         }
 
-        setLoading(true);
+        
         try {
             const response = await axios.put(`http://localhost:5000/tasks/update-admin/${editTaskId}`, formData, {
                 headers: {
@@ -101,9 +99,7 @@ function UserTasksPage() {
             setEditFile(null);
         } catch (err) {
             console.error("Error updating task:", err);
-        } finally {
-            setLoading(false);
-        }
+        } 
     };
 
     return (

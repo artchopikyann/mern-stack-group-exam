@@ -34,6 +34,7 @@ const Login = () => {
         if(data.user.role === 'user'){
           localStorage.setItem('status', data.user.status);
         }
+        
         navigate('/todo');
       } else {
         setErrorMessage(data.message || 'Login failed.');

@@ -11,7 +11,6 @@ const Header = ({ user }) => {
         localStorage.removeItem('token');
         localStorage.removeItem('role');
         window.location.href = '/login';
-
     };
 
     useEffect(() => {
@@ -46,7 +45,6 @@ const Header = ({ user }) => {
 
     return (
         <header>
-
             <div className='logo'>
                 <Link to={'/todo'}>
                     <img src={'images/logotext.png'} style={{ width: "200px" }} alt={"logo"} />
@@ -61,14 +59,24 @@ const Header = ({ user }) => {
                     <li className={active === '/admin' ? 'active' : ''}>
                         <Link className="nav-link" to="/admin" onClick={() => setActive('/admin')}>Admin Dashboard</Link>
                     </li>
-                ): null}
+                ) : null}
                 <li className={active === '/profile' ? 'active' : ''}>
                     <Link className="nav-link" to="/profile" onClick={() => setActive('/profile')}>Profile Settings</Link>
                 </li>
-                <li className={`notif ${active === '/notifications' ? 'active' : ''}`}>
-                    <Link className="nav-link" to="/notifications" onClick={() => setActive('/notifications')}>Notifications</Link>
-                    <span className='notification-icon'></span>
-                </li>
+                {
+                    userInfo.role === 'user' ? (
+                        <li className={`notif ${active === '/notifications' ? 'active' : ''}`}>
+                            <Link className="nav-link" to="/notifications" onClick={() => setActive('/notifications')}>Notifications</Link>
+                            <span className='notification-icon'></span>
+                        </li>
+                    ) : (
+                        <li className={`notif ${active === '/notifications-admin' ? 'active' : ''}`}>
+                            <Link className="nav-link" to="/notifications-admin" onClick={() => setActive('/notifications-admin')}>Notifications</Link>
+                            <span className='notification-icon'></span>
+                        </li>
+                    )
+                }
+
                 <li className={active === '/logout' ? 'active' : ''}>
                     <Link className="nav-link" to="#" onClick={logout}>Logout</Link>
                 </li>

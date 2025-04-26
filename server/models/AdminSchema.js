@@ -40,6 +40,11 @@ const AdminSchema = new mongoose.Schema({
         type: mongoose.Schema.Types.ObjectId,
         ref: "Task",
     }],
+    notifications: [{
+        message: { type: String, required: true },
+        date: { type: Date, default: Date.now },
+        read: { type: Boolean, default: false }
+    }]
 });
 
 module.exports = mongoose.model("Admin", AdminSchema);

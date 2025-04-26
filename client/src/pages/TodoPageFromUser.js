@@ -13,6 +13,7 @@ function App() {
     const [searchTerm, setSearchTerm] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
 
+
     useEffect(() => {
         console.log(tasks);
         const fetchTasks = async () => {
@@ -69,6 +70,7 @@ function App() {
         formData.append("title", title);
         formData.append("description", description);
         formData.append("status", status);
+        formData.append("notification", '');
         if (file) formData.append("file", file);
 
      console.log(editTaskId)

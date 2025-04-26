@@ -4,7 +4,6 @@ const Admin = require('../models/AdminSchema');
 const multer = require("multer");
 const path = require("path");
 const fs = require("fs");
-const { notification } = require("./NotificationController");
 
 const storage = multer.diskStorage({
     destination: (req, file, cb) => {
@@ -32,7 +31,6 @@ class TaskController {
 
         try {
             const user = await User.findOne({ _id: userId }).select('tasks');
-            console.log("Fetched user:", user);
 
             if (!user) {
                 return res.status(404).json({ message: "User not found" });
@@ -53,19 +51,14 @@ class TaskController {
     };
 
     static addTask = async (req, res) => {
-        console.log('add task', req.file)
         try {
             const { title, description, creationDay, deadline, userId } = req.body;
             const file = req.file ? req.file.filename : null;
-
-            // console.log(1111, req.file)
 
             const user = await User.findById(userId);
             if (!user) return res.status(404).json({ message: "User not found" });
 
             const adminId = req.userId;
-
-
 
             const newTask = await Task.create({
                 title,
@@ -89,7 +82,7 @@ class TaskController {
             });
 
             user.notifications.push({
-                message: 'The admin has assigned a new task:'
+                message: `The admin has assigned a new task: ${newTask.title}`
             })
 
             await user.save();
@@ -146,6 +139,11 @@ class TaskController {
                 }
             }
 
+            if (user) {
+                user.notifications.push({ message: `admin updated the task: ${task.title}` });
+                await user.save();
+            }
+
             return res.status(200).json({
                 message: "Task updated successfully",
                 task: {
@@ -154,7 +152,7 @@ class TaskController {
                     status: task.status,
                     deadline: task.deadline,
                     file: task.file,
-                }
+                },
             });
 
         } catch (error) {
@@ -164,11 +162,12 @@ class TaskController {
     }
 
     static updateTask = async (req, res) => {
-        const { title, status, description } = req.body;
+        const { title, status, description , notification} = req.body;
         const { id } = req.params;
         const userId = req.userId;
 
         try {
+            
             const user = await User.findOne({ _id: userId });
 
             if (!user) return res.status(404).json({ message: "User not found" });
@@ -185,6 +184,13 @@ class TaskController {
             }
 
             await user.save();
+
+            const admin = await Admin.findOne({ role: 'admin' });
+
+            if(admin){
+                admin.notifications.push({message: `user completed the task - userId : ${user._id} , taskTitle : ${task.title}`});
+            }
+            await admin.save();
 
             res.json({ task });
         } catch (err) {

@@ -672,10 +672,6 @@ button:nth-child(3):hover {
   color: var(--text-color-light);
 }
 
-
-
-
-
 .general .file-button,
 .general .submit-btn,
 .general .categorybtn button,
@@ -827,6 +823,7 @@ button:nth-child(3):hover {
   font-size: 0.85rem;
   color: var(--text-color-light);
   text-align: right;
+  padding: 5px 10px;
 }
 
 .task-buttons {

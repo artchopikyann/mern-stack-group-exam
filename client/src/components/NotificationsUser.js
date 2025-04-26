@@ -1,14 +1,14 @@
 import React, { useEffect } from 'react';
 import axios from 'axios';
 
-const NotificationsUser = ({ notifications, setNotifications }) => {
+const NotificationsUser = ({ notificationsUser, setNotificationsUser }) => {
   useEffect(() => {
-    const hasUnread = notifications.some(notif => !notif.read);
+    const hasUnread = notificationsUser.some(notif => !notif.read);
     const notif = document.querySelector('.notif span');
     if (hasUnread) {
       notif.classList.add('active');
     }
-  }, [notifications])
+  }, [notificationsUser])
 
   const markAsRead = async (id) => {
     try {
@@ -19,7 +19,7 @@ const NotificationsUser = ({ notifications, setNotifications }) => {
         },
       });
 
-      setNotifications(prev =>
+      setNotificationsUser(prev =>
         prev.map(n => n._id === id ? { ...n, read: true } : n)
       );
     } catch (err) {
@@ -31,12 +31,12 @@ const NotificationsUser = ({ notifications, setNotifications }) => {
     <div className="notifications-container">
       <div className="notifications-header">
         <h1 className="notifications-title">Your Notifications</h1>
-        <div className="notifications-count">{notifications.length} {notifications.length === 1 ? 'notification' : 'notifications'}</div>
+        <div className="notifications-count">{notificationsUser.length} {notificationsUser.length === 1 ? 'notification' : 'notifications'}</div>
       </div>
 
-      {notifications.length > 0 ? (
+      {notificationsUser.length > 0 ? (
         <ul className="notifications-list">
-          {notifications.map((notif) => (
+          {notificationsUser.map((notif) => (
             <li key={notif._id} className={`notification-item ${notif.read ? 'read' : 'unread'}`}>
               <div className="notification-content">
                 <p className="notification-message">{notif.message}</p>
