@@ -13,9 +13,10 @@ function App() {
     const [searchTerm, setSearchTerm] = useState("");
     const [modalOpen, setModalOpen] = useState(false);
 
+    const [taskWarnings, setTaskWarnings] = useState({});
+    const [taskErrors, setTaskErrors] = useState({});
 
     useEffect(() => {
-        console.log(tasks);
         const fetchTasks = async () => {
             const token = localStorage.getItem('token');
             try {
@@ -25,6 +26,30 @@ function App() {
                     }
                 });
                 setTasks(res.data);
+
+                // Ստուգել task-երի warning/error վիճակները
+                const warnings = {};
+                const errors = {};
+
+                const today = new Date();
+
+                res.data.forEach(task => {
+                    if (task.deadline) {
+                        const deadlineDate = new Date(task.deadline);
+                        const diffTime = deadlineDate.getTime() - today.getTime();
+                        const diffDays = diffTime / (1000 * 3600 * 24);
+
+                        if (diffDays < 0) {
+                            errors[task._id] = "❌ Task deadline missed!";
+                        } else if (diffDays <= 1) {
+                            warnings[task._id] = "⚠️ Deadline is near!";
+                        }
+                    }
+                });
+
+                setTaskWarnings(warnings);
+                setTaskErrors(errors);
+
             } catch (err) {
                 console.error("Error fetching tasks:", err.message);
             }
@@ -73,7 +98,7 @@ function App() {
         formData.append("notification", '');
         if (file) formData.append("file", file);
 
-     console.log(editTaskId)
+        console.log(editTaskId)
         try {
             const res = await axios.put(`http://localhost:5000/tasks/update-user/${editTaskId}`, formData, {
                 headers: {
@@ -159,49 +184,76 @@ function App() {
 
             <ul className="task-list">
 
-                {filteredTasks.map((task) => (
-                    <li key={task._id} className="task-list-item" onClick={() => {
-                        updateStatus(task._id, 'inprogress');
-                        setTitle(task.title);
-                        setDescription(task.description || "");
-                        setStatus(task.status);
-                        setFile(null);
-                        setEditTaskId(task._id);
-                        setModalOpen(true);
-                    }}>
+                {filteredTasks.map((task) => {
+                    let backgroundColor = "white";
 
-                        <div className="row-todo">
-                            <div className={task.status} id="status">
-                                <p className="status-text">
-                                    {task.status === "inprogress"
-                                        ? "In Progress"
-                                        : task.status === "pending"
-                                            ? "Pending"
-                                            : "Completed"}
-                                </p>
+                    if (taskErrors[task._id]) {
+                        backgroundColor = "#ffcccc"; // light red for errors
+                    } else if (taskWarnings[task._id]) {
+                        backgroundColor = "#fff3cd"; // light yellow for warnings
+                    }
+
+                    return (
+                        <li
+                            key={task._id}
+                            className="task-list-item"
+                            style={{ backgroundColor }} // <-- use dynamic backgroundColor
+                            onClick={() => {
+                                updateStatus(task._id, 'inprogress');
+                                setTitle(task.title);
+                                setDescription(task.description || "");
+                                setStatus(task.status);
+                                setFile(null);
+                                setEditTaskId(task._id);
+                                setModalOpen(true);
+                            }}
+                        >
+                            <div className="row-todo">
+                                <div className="status-box">
+                                    <div className={task.status} id="status">
+                                        <p className="status-text">
+                                            {task.status === "inprogress"
+                                                ? "In Progress"
+                                                : task.status === "pending"
+                                                    ? "Pending"
+                                                    : "Completed"}
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div className="task-list-title">{task.title}</div>
+                                <div className="task-descr">{task.description}</div>
+
+                                {task.file && (
+                                    <a
+                                        href={`http://localhost:5000/download/${task.file}`}
+                                        download
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        className="download-btn"
+                                        onClick={(e) => e.stopPropagation()}
+                                    >
+                                        <img src="/images/file.png" alt="file" style={{ width: "30px" }} />
+                                    </a>
+                                )}
+                                <div className="foot">
+                                    <div className="task-dater">
+                                        {task.creationDay?.slice(0, 10)} / {task.deadline?.slice(0, 10)}
+                                    </div>
+
+                                    {taskErrors[task._id] && (
+                                        <p style={{ color: "red", fontWeight: "bold" }}>{taskErrors[task._id]}</p>
+                                    )}
+                                    {taskWarnings[task._id] && (
+                                        <p style={{ color: "orange", fontWeight: "bold" }}>{taskWarnings[task._id]}</p>
+                                    )}
+                                </div>
+
                             </div>
-                            <div className="task-list-title">{task.title}</div>
-                            <div className="task-descr">{task.description}</div>
+                        </li>
+                    );
+                })}
 
-                            {task.file && (
-                                <a
-                                    href={`http://localhost:5000/download/${task.file}`}
-                                    download
-                                    target="_blank"
-                                    rel="noopener noreferrer"
-                                    className="download-btn"
-                                    onClick={(e) => e.stopPropagation()}
-                                >
-                                    <img src="/images/file.png" alt="file" style={{ width: "30px"}} />
-                                </a>
-                            )}
-                            <div className="task-dater">
-                                {task.creationDay?.slice(0, 10)} / {task.deadline?.slice(0, 10)}
-                            </div>
-
-                        </div>
-                    </li>
-                ))}
             </ul>
 
 

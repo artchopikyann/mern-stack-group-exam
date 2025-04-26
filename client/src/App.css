@@ -763,7 +763,7 @@ button:nth-child(3):hover {
 
 .task-list {
   width: 100%;
-  margin: 32px auto;
+  margin: 0 auto;
   border-radius: 20px;
   padding: 24px 32px;
   display: flex;
@@ -775,16 +775,35 @@ button:nth-child(3):hover {
 .row-todo {
   display: flex;
   flex-direction: column;
+  justify-content: center;
+  align-items: center;
   gap: 16px;
 }
 
 #status {
-  align-self: flex-start;
+  align-self:center;
   border-radius: 50px;
   padding: 6px 16px;
   font-size: 0.9rem;
   font-weight: 600;
   width: fit-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.status-box {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.foot{
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .inprogress {
@@ -833,6 +852,13 @@ button:nth-child(3):hover {
   margin-top: 20px;
   flex-wrap: wrap;
   padding: 0 10px;
+}
+
+.task-buttons-box{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
 }
 
 .edit-button,
@@ -1666,6 +1692,18 @@ button:nth-child(3):hover {
 /* Extra small devices (portrait phones, less than 576px) */
 @media (max-width: 575.98px) {
 
+  .foot{
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex: 0 0 100%;
+  }
+
+  .task-dater{
+    width: 100%;
+    text-align: center;
+  }
 
   header {
     padding: 70px 0 10px;
@@ -2312,7 +2350,6 @@ body.dark-mode .task-list-item {
   grid-area: status;
   align-self: start;
 }
-
 .task-dater {
   grid-area: date;
   font-size: 0.85rem;
@@ -2321,7 +2358,6 @@ body.dark-mode .task-list-item {
   align-self: end;
   background-color: var(--bg-color);
   border-radius: 10px;
-  margin-bottom: 10px;
 }
 
 body.dark-mode .task-dater {
